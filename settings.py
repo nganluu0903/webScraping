@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = "webScraping.spiders"
 #USER_AGENT = "webScraping (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -27,8 +27,8 @@ ROBOTSTXT_OBEY = True
 # See also autothrottle settings and docs
 #DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
-#CONCURRENT_REQUESTS_PER_IP = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 5
+CONCURRENT_REQUESTS_PER_IP = 5
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -43,6 +43,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Language': 'en',
 }
+RETRY_HTTP_CODES = [429]
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
@@ -52,9 +53,10 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    "webScraping.middlewares.WebscrapingDownloaderMiddleware": 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+   "webScraping.middlewares.WebscrapingDownloaderMiddleware": None,
+   "webScraping.middlewares.TooManyRequestsRetryMiddleware": 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
