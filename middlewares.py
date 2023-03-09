@@ -4,11 +4,39 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from urllib.parse import urlencode
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+API_KEY = '<>'
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+from scrapy.utils.response import response_status_message
 
+import time
+    
+class TooManyRequestsRetryMiddleware(RetryMiddleware):
+    
+    def __init__(self, crawler):
+        super(TooManyRequestsRetryMiddleware, self).__init__(crawler.settings)
+        self.crawler = crawler
 
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler)
+
+    def process_response(self, request, response, spider):
+        if request.meta.get('dont_retry', False):
+            return response
+        elif response.status == 429:
+            payload = {'api_key': API_KEY, 'url': request.url}
+            proxy_url = 'https://proxy.scrapeops.io/v1/?' + urlencode(payload)
+            request = request.replace(url=proxy_url, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36"})
+            
+            self.crawler.engine.pause()
+            time.sleep(60) # If the rate limit is renewed in a minute, put 60 seconds, and so on.
+            self.crawler.engine.unpause()
+            reason = response_status_message(response.status)
+            return self._retry(request, reason, spider) or response
+        return response 
 class WebscrapingSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
@@ -87,7 +115,7 @@ class WebscrapingDownloaderMiddleware:
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
-        return response
+        return response 
 
     def process_exception(self, request, exception, spider):
         # Called when a download handler or a process_request()
