@@ -44,7 +44,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept-Language': 'en',
 }
 RETRY_HTTP_CODES = [429]
-
+RETRY_TIMES = 0
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
